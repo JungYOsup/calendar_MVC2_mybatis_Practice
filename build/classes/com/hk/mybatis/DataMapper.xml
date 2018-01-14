@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- xml는 처음에 다 읽고 시작해서 쿼리가 하나 고장나면 다른것도 안된다 
+그리고 *****원래는 파라미터를 받아올때 객체로 받아온다. 즉 Dao에서도 int나 이러한 기본타입으로 전달해주는게 아니라 Map같은 객체로 전달해줘야한다.
+그런데 int로 보내고 int로 받는게 됬는데? 그거는 특수한 경우이다.-->
+
+<mapper namespace="com.hk.calboard">
+	
+	
+	<!--**우리가 mybatis에서는 데이터의 칼럼명과 dto의 맴버필드의 이름이 같아함,그래야지 알아서 처리해줌(순서는달라도됨) 
+		만약 데이터 칼럼명이 SEQ고  dto에 맴버필드가 seqs라고 되어있을경우 mybatis에서 제대로된 기능을 해줄수가 없다
+		그렇기에   resultMap을 통해서  칼럼명 SEQ와 맴버필드 seqs가 같다고 설정해주는것이라고 설정해주는것이다.-->
+	
+	<!--여기서는 맴퍼빌드랑 칼럼명이 같은데도 써준이유는 그냥 설명해주기 위해서,칼럼명과 맴버필드의 이름이 다를경우에 resultMap을 해준다. -->
+	<resultMap type="com.hk.dto.Dto" id="CalDtoMap">
+		
+		<result property="seq" column="SEQ"/> <!--property="dto의 맴버필드 " column="실제테이블에 칼럼명들" -->
+		<result property="id" column="ID"/>
+		<result property="title" column="TITLE"/>
+		<result property="content" column="CONTENT"/>
+		<result property="mDate" column="MDATE"/>
+		<result property="regDate" column="REGDATE"/>
+		
+	</resultMap>
+	
+	<!--목록추가  -->
+	<!--parameterMap은 쓰지 않는다. , resultMap="resultMap의 id"를 설정해줌으로써 칼럼명 SEQ와 맴버필드 seqs가 같다고 인지하게 되는것이다.  
+	여기서는 맴퍼빌드랑 칼럼명이 같기떄문에 쓸필요는 없지만 만약 다를 경우 resultMap으로 해주고 여기에 설정해주는것이다
+	그리고  CalDtoMap 가 즉 type="com.hk.caldtos.CalDto" 이므로 dto타입이다.
+	즉 resultMap을 쓰게 되면 첫째 맴버필드의 이름과 칼럼의 이름이 달라도 상관없게 해주고 , 둘째 쿼리의 결과값의 타입을
+	위에서 지정해준 type("com.hk.caldtos.CalDto")으로 해준다 yyyyMMdd를로 찾은이유는 그날의 일정을 가져오기 위해서이다 시분초를 다 가져오면 그거는 그날의 일정이 아니니까-->
+	<select id="calllist" parameterType="Map" resultMap="CalDtoMap">
+	
+	SELECT SEQ,ID,TITLE,CONTENT,MDATE,REGDATE FROM CALBOARD WHERE ID=#{id} AND SUBSTR(MDATE,1,8)=#{yyyyMMdd}
+	
+	</select>
+		
+	<!--일정추가-->
+	<insert id="insertboard" parameterType="calDto">
+		
+		INSERT INTO CALBOARD (SEQ,ID,TITLE,CONTENT,MDATE,REGDATE) VALUES (CALBOARD_SEQ.NEXTVAL,#{id},#{title},#{content},#{mDate},SYSDATE) 
+	
+	</insert>
+	<!--상세조회  -->
+	<select id="seldetail" parameterType="Map" resultMap="CalDtoMap">
+		
+		SELECT SEQ,ID,TITLE,CONTENT,MDATE,REGDATE FROM CALBOARD WHERE SEQ = #{seq}
+	
+	</select>
+	
+	<!--일정수정하기(update문)  -->
+	<update id="updateboard" parameterType="Map">
+	
+		UPDATE CALBOARD SET TITLE=#{title} , CONTENT=#{content} ,REGDATE =SYSDATE WHERE SEQ =#{seq} 
+		
+	</update>
+	
+	
+	<!--일정삭제하기(delete문)  쿼리에서 IN(a,b,c)는 a또는 b또는 c를 말함-->
+	<delete id="muldel" parameterType="Map">
+		
+		DELETE FROM CALBOARD WHERE SEQ IN
+		<foreach collection="seq" item="seq" open="(" close=")" separator=",">
+			#{seq}
+		</foreach>
+		
+		<!--collection은 받아온 key값 item은 벨류값  , 받아온 seq의 숫자만큼 만복함-->
+	
+	</delete>
+	
+	
+	
+	
+	
+</mapper>

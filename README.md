@@ -121,14 +121,4 @@ SELECT SEQ,ID,NAME,TITLE,CONTENT,to_char(REGDATE,'YYYY-DD-MM hh24:mi:ss') as Aja
 
 두번째의 경우 우리가 dao에서 결과값을 호출하고 받을때 dto의 맴버필드와 결과값의 칼럼명이 같으므로 값이 전달된다 않는다.
 (대소문자는 상관없다 즉 칼럼이 대문자고 맴버필드가 소문자여도 mybatis에서는 알아서 mapping을 해준다.)
-
-
-			
-		}
 		
-		
-		
-		return dto;
-	}
-
-
